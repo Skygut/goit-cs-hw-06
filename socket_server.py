@@ -1,24 +1,31 @@
 import socket
-import threading
+import pymongo
+import json
+
+# Підключення до MongoDB
+client = pymongo.MongoClient("mongodb://localhost:27017/")
+db = client["mydatabase"]
+collection = db["messages"]
 
 
-def handle_client(connection, address):
-    print(f"Підключення з {address} встановлено")
-    # Тут ви можете додати логіку для обробки даних від клієнта
-    connection.close()
+def socket_server():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("localhost", 5000))
+        s.listen()
+        print("Socket server listening on port 5000")
+        conn, addr = s.accept()
+        with conn:
+            print(f"Connected by {addr}")
+            while True:
+                data = conn.recv(1024)
+                if not data:
+                    break
+                # Обробка отриманих даних
+                data_dict = json.loads(data.decode("utf-8"))
+                # Зберігання даних у MongoDB
+                collection.insert_one(data_dict)
+                print("Data saved to MongoDB")
 
 
-def start_server(port):
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(("", port))
-    server.listen()
-    print(f"Socket сервер слухає на порту {port}")
-
-    while True:
-        conn, addr = server.accept()
-        thread = threading.Thread(target=handle_client, args=(conn, addr))
-        thread.start()
-
-
-# Запуск Socket сервера на порту 5000
-start_server(5000)
+if __name__ == "__main__":
+    socket_server()
