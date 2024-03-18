@@ -38,7 +38,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             # Відправка даних на Socket-сервер
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.connect(("localhost", 5000))
+                sock.connect(("localhost", 6000))
                 sock.sendall(post_data)
 
             self.send_response(200)

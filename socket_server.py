@@ -10,21 +10,25 @@ collection = db["messages"]
 
 def socket_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("localhost", 5000))
+        s.bind(("localhost", 6000))
         s.listen()
-        print("Socket server listening on port 5000")
+        print("Сокет сервер слухає порт 5000")
         conn, addr = s.accept()
         with conn:
-            print(f"Connected by {addr}")
+            print(f"Підключено {addr}")
             while True:
                 data = conn.recv(1024)
                 if not data:
                     break
-                # Обробка отриманих даних
-                data_dict = json.loads(data.decode("utf-8"))
-                # Зберігання даних у MongoDB
-                collection.insert_one(data_dict)
-                print("Data saved to MongoDB")
+                try:
+                    # Спроба декодувати та розібрати дані
+                    data_dict = json.loads(data.decode("utf-8"))
+                    print(data_dict)
+                    # Спроба зберегти дані в MongoDB
+                    collection.insert_one(data_dict)
+                    print("Дані збережено в MongoDB")
+                except (json.JSONDecodeError, pymongo.errors.PyMongoError) as e:
+                    print(f"Помилка при обробці даних: {e}")
 
 
 if __name__ == "__main__":
