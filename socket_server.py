@@ -2,7 +2,7 @@ import socket
 import pymongo
 import json
 
-PORT = 6000
+PORT = 7000
 # Підключення до MongoDB
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client["mydatabase"]
