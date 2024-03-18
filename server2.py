@@ -2,6 +2,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import urllib.parse
 import socket
 
+PORT = 6000
+
 
 class RequestHandler(BaseHTTPRequestHandler):
     def do_GET(self):
@@ -38,7 +40,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             # Відправка даних на Socket-сервер
             with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-                sock.connect(("localhost", 6000))
+                sock.connect(("localhost", PORT))
                 sock.sendall(post_data)
 
             self.send_response(200)

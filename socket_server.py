@@ -2,6 +2,7 @@ import socket
 import pymongo
 import json
 
+PORT = 6000
 # Підключення до MongoDB
 client = pymongo.MongoClient("mongodb://localhost:27017/")
 db = client["mydatabase"]
@@ -10,9 +11,9 @@ collection = db["messages"]
 
 def socket_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("localhost", 6000))
+        s.bind(("localhost", PORT))
         s.listen()
-        print("Сокет сервер слухає порт 5000")
+        print(f"Сокет сервер слухає порт {PORT}")
         conn, addr = s.accept()
         with conn:
             print(f"Підключено {addr}")
