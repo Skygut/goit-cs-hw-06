@@ -15,4 +15,4 @@ EXPOSE 3000
 EXPOSE 5001
 
 # Команда для запуску скрипта
-CMD ["python", "main.py"]
+CMD ["python3", "main.py"]
