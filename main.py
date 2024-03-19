@@ -10,7 +10,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 from connect_db import create_connect
 
-from socket_srv import socket_server
+# from socket_srv import socket_server
 
 server_running = True
 WEB_DIR = "./front-init"
@@ -74,6 +74,60 @@ class RequestHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.end_headers()
             self.wfile.write(b"Data sent to socket server")
+
+
+def handle_client(connection, address):
+    print(f"Connected with {address}")
+
+    try:
+        while True:
+            data = connection.recv(1024).decode("utf-8")
+            if not data:
+                break
+            parsed_data = urllib.parse.parse_qs(data)
+            if "message" in parsed_data:
+                parsed_data["message"] = [
+                    parsed_data["message"][0].strip().replace("\r\n", " ")
+                ]
+            username = parsed_data.get("username", [""])[0]
+            message = parsed_data.get("message", [""])[0]
+
+            client = create_connect()
+            db = client["db-messages"]
+            collection = db["messages"]
+
+            post = {
+                "date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "username": username,
+                "message": message,
+            }
+
+            collection.insert_one(post)
+            print("Message was saved on MongoDB")
+    except Exception as e:
+        logging.error(f"Error: {e}")
+
+    finally:
+        connection.close()
+
+
+def socket_server(port):
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind(("", port))
+    server.listen()
+    global server_running
+    try:
+        print(f"Starting socket server on port {port}")
+        while server_running:
+            conn, addr = server.accept()
+            thread = threading.Thread(target=handle_client, args=(conn, addr))
+            thread.start()
+    except KeyboardInterrupt:
+        logging.error("Server stoping...")
+        server_running = False
+    finally:
+        server.close()
 
 
 def run_server(port):
