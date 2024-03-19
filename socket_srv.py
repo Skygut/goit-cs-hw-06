@@ -20,7 +20,7 @@ server_running = True
 
 
 def handle_client(connection, address):
-    print(f"Підключення з {address} встановлено")
+    print(f"Connected with {address}")
 
     try:
         while True:
@@ -29,7 +29,9 @@ def handle_client(connection, address):
                 break
             parsed_data = urllib.parse.parse_qs(data)
             if "message" in parsed_data:
-                parsed_data["message"] = [parsed_data["message"][0].strip()]
+                parsed_data["message"] = [
+                    parsed_data["message"][0].strip().replace("\r\n", " ")
+                ]
             username = parsed_data.get("username", [""])[0]
             message = parsed_data.get("message", [""])[0]
 
@@ -44,9 +46,9 @@ def handle_client(connection, address):
             }
 
             collection.insert_one(post)
-            print("Повідомлення збережено в MongoDB")
+            print("Message was saved on MongoDB")
     except Exception as e:
-        logging.error(f"Помилка при обробці даних: {e}")
+        logging.error(f"Error: {e}")
 
     finally:
         connection.close()
