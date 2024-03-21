@@ -21,7 +21,7 @@ def create_connect() -> MongoClient:
 
 
 if __name__ == "__main__":
-    client = create_connect()
+    client = MongoClient("mongodb://localhost:27017/")
     db = client["db-messages"]
     collection = db["messages"]
     cats = collection.find()
